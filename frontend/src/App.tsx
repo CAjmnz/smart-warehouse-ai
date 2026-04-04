@@ -1,21 +1,46 @@
-import { useEffect, useState } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, useGLTF } from "@react-three/drei";
+import { Suspense } from "react";
 
-function App() {
-  const [status, setStatus] = useState("Connecting...");
+function Warehouse() {
+  const { scene } = useGLTF("/warehouse.glb");
+  return <primitive object={scene} scale={0.1} />;
+}
 
-  useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/ai-test")
-      .then((res) => res.json())
-      .then((data) => setStatus(data.message))
-      .catch(() => setStatus("Could not reach backend"));
-  }, []);
-
+function LoadingScreen() {
   return (
-    <div style={{ color: "white", background: "#111", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
-      <h1>Smart Warehouse AI</h1>
-      <p>Backend status: <strong>{status}</strong></p>
-    </div>
+    <mesh>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial color="grey" />
+    </mesh>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <div style={{ width: "100vw", height: "100vh", background: "#1a1a2e" }}>
+      <h1 style={{
+        position: "absolute",
+        top: 20,
+        left: 20,
+        color: "white",
+        zIndex: 10,
+        margin: 0,
+        fontFamily: "Arial"
+      }}>
+        Smart Warehouse AI
+      </h1>
+
+      <Canvas camera={{ position: [10, 8, 10], fov: 60 }}>
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[10, 10, 5]} intensity={1} />
+
+        <Suspense fallback={<LoadingScreen />}>
+          <Warehouse />
+        </Suspense>
+
+        <OrbitControls />
+      </Canvas>
+    </div>
+  );
+}
